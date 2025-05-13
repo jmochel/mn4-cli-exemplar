@@ -7,6 +7,7 @@ import org.saltations.endeavour.Failure;
 import org.saltations.endeavour.FailureAnalysis;
 import org.saltations.endeavour.Outcomes;
 
+import io.micronaut.configuration.picocli.PicocliRunner;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -27,11 +28,8 @@ public class Mn4CliExemplarCommand implements Callable<Outcome<FailureAnalysis, 
 
     public static void main(String... args) throws Exception {
 
-        var cmd = new CommandLine(new Mn4CliExemplarCommand());
-        
-        cmd.execute(args);
+        var result = PicocliRunner.call(Mn4CliExemplarCommand.class, args);
 
-        var result = (Outcome<?,?>) cmd.getExecutionResult();
         if (result instanceof Failure) {
             System.exit(1);
         } else {
