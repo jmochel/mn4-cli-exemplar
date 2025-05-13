@@ -1,0 +1,6 @@
+applicationType: cli
+defaultPackage: org.saltations.mn4
+testFramework: junit
+sourceLanguage: java
+buildTool: maven
+features: [app-name, http-client-test, java, junit, logback, lombok, maven, maven-enforcer-plugin, picocli, picocli-java-application, picocli-junit, readme, serialization-jackson, shade, validation, yaml, yaml-build]

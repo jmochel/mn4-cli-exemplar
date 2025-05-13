@@ -1,0 +1,3 @@
+micronaut:
+  application:
+    name: mn4-cli-exemplar
