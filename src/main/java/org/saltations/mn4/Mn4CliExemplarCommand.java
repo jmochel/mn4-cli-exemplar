@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.saltations.endeavour.Outcome;
 import org.saltations.endeavour.Failure;
-import org.saltations.endeavour.FailureAnalysis;
+import org.saltations.endeavour.FailureDescription;
 import org.saltations.endeavour.Outcomes;
 
 import io.micronaut.configuration.picocli.PicocliRunner;
@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
             TZCommand.class,
             IPCommand.class
         })
-public class Mn4CliExemplarCommand implements Callable<Outcome<FailureAnalysis, Integer>> {
+public class Mn4CliExemplarCommand implements Callable<Outcome<FailureDescription, Integer>> {
 
     @Option(names = {"-v", "--verbose"}, description = "...")
     boolean verbose;
@@ -38,7 +38,7 @@ public class Mn4CliExemplarCommand implements Callable<Outcome<FailureAnalysis, 
     }
 
     @Override
-    public Outcome<FailureAnalysis, Integer> call() {
+    public Outcome<FailureDescription, Integer> call() {
         // business logic here
         if (verbose) {
             System.out.println("Hi!");
@@ -46,29 +46,4 @@ public class Mn4CliExemplarCommand implements Callable<Outcome<FailureAnalysis, 
         return Outcomes.succeed(0);
     }
 
-    @Slf4j
-    @Command(name = "tz", 
-        description = "WorldTimeAPI Timezone query command",
-        mixinStandardHelpOptions = true)
-    public static class TZCommand implements Callable<Outcome<FailureAnalysis, Integer>> {
-
-        @Override
-        public Outcome<FailureAnalysis, Integer> call() {
-            // business logic here
-            return Outcomes.succeed(0);
-        }
-    }
-    
-    @Slf4j
-    @Command(name = "ip", 
-        description = "WorldTimeAPI IP Geolocation command",
-        mixinStandardHelpOptions = true)
-    public static class IPCommand implements Callable<Outcome<FailureAnalysis, Integer>> {
-
-        @Override
-        public Outcome<FailureAnalysis, Integer> call() {
-            // business logic here
-            return Outcomes.succeed(0);
-        }
-    }
 }
