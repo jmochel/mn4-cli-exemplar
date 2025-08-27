@@ -8,7 +8,6 @@ import org.saltations.endeavour.FailureDescription;
 import org.saltations.endeavour.Outcomes;
 
 import io.micronaut.configuration.picocli.PicocliRunner;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import java.util.concurrent.Callable;
