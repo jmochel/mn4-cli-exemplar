@@ -1,16 +1,16 @@
 package org.saltations.mn4;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.Callable;
 
 import org.saltations.endeavour.Outcome;
-import org.saltations.endeavour.Failure;
-import org.saltations.endeavour.FailureDescription;
 import org.saltations.endeavour.Outcomes;
 
-import io.micronaut.configuration.picocli.PicocliRunner;
+import io.micronaut.configuration.picocli.MicronautFactory;
+import io.micronaut.context.ApplicationContext;
+import lombok.extern.slf4j.Slf4j;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import java.util.concurrent.Callable;
 
 @Slf4j
 @Command(name = "mn4-cli-exemplar", 
@@ -20,24 +20,33 @@ import java.util.concurrent.Callable;
             TZCommand.class,
             IPCommand.class
         })
-public class Mn4CliExemplarCommand implements Callable<Outcome<FailureDescription, Integer>> {
+public class Mn4CliExemplarCommand implements Callable<Outcome<Integer>> {
 
     @Option(names = {"-v", "--verbose"}, description = "...")
     boolean verbose;
 
     public static void main(String... args) throws Exception {
 
-        var result = PicocliRunner.call(Mn4CliExemplarCommand.class, args);
+        try (ApplicationContext ctx = ApplicationContext.run()) {
 
-        if (result instanceof Failure) {
-            System.exit(1);
-        } else {
-            System.exit(0);
+            var root = ctx.createBean(Mn4CliExemplarCommand.class);
+
+            // Create a new CommandLine instance with the root command and the Micronaut factory
+
+            var factory = new MicronautFactory(ctx);
+            var executionStrategy = factory.create(RunAllStopOnError.class);
+
+            var cmdLine = new CommandLine(root, factory);
+            cmdLine.setExecutionStrategy(executionStrategy);
+
+            int exit = cmdLine.execute(args);
+
+            System.exit(exit);
         }
     }
 
     @Override
-    public Outcome<FailureDescription, Integer> call() {
+    public Outcome<Integer> call() {
         // business logic here
         if (verbose) {
             System.out.println("Hi!");

@@ -2,7 +2,6 @@ package org.saltations.mn4;
 
 import java.util.concurrent.Callable;
 
-import org.saltations.endeavour.FailureDescription;
 import org.saltations.endeavour.Outcome;
 import org.saltations.endeavour.Outcomes;
 
@@ -14,13 +13,13 @@ import picocli.CommandLine.Command;
 @Command(name = "ls", 
     description = "List Timezones",
     mixinStandardHelpOptions = true)
-public class TZListTimezonesCommand implements Callable<Outcome<FailureDescription, Integer>> 
+public class TZListTimezonesCommand implements Callable<Outcome<Integer>> 
 {
     @Inject
     private WorldTimeApiClient client;
 
     @Override
-    public Outcome<FailureDescription, Integer> call() {
+    public Outcome<Integer> call() {
         // business logic here
         var timezones = client.listTimezones();
 

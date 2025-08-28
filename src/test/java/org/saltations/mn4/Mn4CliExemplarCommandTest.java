@@ -1,16 +1,16 @@
 package org.saltations.mn4;
 
-import io.micronaut.configuration.picocli.PicocliRunner;
-import io.micronaut.context.ApplicationContext;
-import io.micronaut.context.env.Environment;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.junit.jupiter.api.Test;
-import org.saltations.endeavour.FailureDescription;
 import org.saltations.endeavour.Outcome;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import io.micronaut.configuration.picocli.PicocliRunner;
+import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.env.Environment;
 
 public class Mn4CliExemplarCommandTest {
 
@@ -23,9 +23,11 @@ public class Mn4CliExemplarCommandTest {
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
             String[] args = new String[] { "-v" };
 
-            Outcome<FailureDescription, Integer>  outcome = PicocliRunner.call(Mn4CliExemplarCommand.class, ctx, args);
+            Outcome<Integer>  outcome = PicocliRunner.call(Mn4CliExemplarCommand.class, ctx, args);
             // mn4-cli-exemplar
             assertTrue(baos.toString().contains("Hi!"));
         }
     }
+
+    
 }

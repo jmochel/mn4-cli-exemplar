@@ -2,7 +2,6 @@ package org.saltations.mn4;
 
 import java.util.concurrent.Callable;
 
-import org.saltations.endeavour.FailureDescription;
 import org.saltations.endeavour.Outcome;
 import org.saltations.endeavour.Outcomes;
 
@@ -13,10 +12,10 @@ import picocli.CommandLine.Command;
 @Command(name = "ip", 
     description = "IP address lookup command",
     mixinStandardHelpOptions = true)
-public class IPCommand implements Callable<Outcome<FailureDescription, Integer>> {
+public class IPCommand implements Callable<Outcome<Integer>> {
 
     @Override
-    public Outcome<FailureDescription, Integer> call() {
+    public Outcome<Integer> call() {
         // business logic here
         return Outcomes.succeed(0);
     }
