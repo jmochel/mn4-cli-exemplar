@@ -2,8 +2,8 @@ package org.saltations.mn4;
 
 import java.util.concurrent.Callable;
 
-import org.saltations.endeavour.Outcome;
-import org.saltations.endeavour.Outcomes;
+import org.saltations.endeavour.Result;
+import org.saltations.endeavour.Try;
 
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +13,13 @@ import picocli.CommandLine.Command;
 @Command(name = "ls", 
     description = "List Timezones",
     mixinStandardHelpOptions = true)
-public class TZListTimezonesCommand implements Callable<Outcome<Integer>> 
+public class TZListTimezonesCommand implements Callable<Result<Integer>> 
 {
     @Inject
     private WorldTimeApiClient client;
 
     @Override
-    public Outcome<Integer> call() {
+    public Result<Integer> call() {
         // business logic here
         var timezones = client.listTimezones();
 
@@ -29,6 +29,6 @@ public class TZListTimezonesCommand implements Callable<Outcome<Integer>>
             System.out.println(timezone);
         }
         
-        return Outcomes.succeed(0);
+        return Try.success(0);
     }
 }

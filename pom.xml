@@ -30,6 +30,11 @@
       <id>central</id>
       <url>https://repo.maven.apache.org/maven2</url>
     </repository>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages - jmochel/endeavour</name>
+      <url>https://maven.pkg.github.com/jmochel/endeavour</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -81,7 +86,7 @@
     <dependency>
       <groupId>org.saltations.endeavour</groupId>
       <artifactId>endeavour</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>0.2.0</version>
     </dependency>
     <dependency>
       <groupId>io.micronaut</groupId>
@@ -101,6 +106,16 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

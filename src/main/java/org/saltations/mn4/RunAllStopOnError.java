@@ -3,14 +3,15 @@ package org.saltations.mn4;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.saltations.endeavour.Failure;
-import org.saltations.endeavour.Outcome;
-import org.saltations.endeavour.Success;
+import org.saltations.endeavour.Result;
+import org.saltations.endeavour.Try;
 
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.validation.validator.Validator;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
@@ -22,17 +23,17 @@ import picocli.CommandLine.IExecutionStrategy;
  * This is a custom execution strategy that will execute all commands in the chain, and stop on the first error.
  * It is used to ensure that all commands in the chain are executed, and that the first error is propagated.
  * <h4>Note</h4>
- * This should only be used for commands and subcommands that implement Callable<Outcome<Integer>>.
+ * This should only be used for commands and subcommands that implement Callable<Result<Integer>>.
  */
 
 @Slf4j
 @Introspected
 @Singleton
-public class RunAllStopOnError implements IExecutionStrategy  {
-
+public class RunAllStopOnError<T> implements IExecutionStrategy  {
 
     private final Validator validator;
 
+    @Inject
     public RunAllStopOnError(Validator validator) {
         this.validator = validator;
     }
@@ -51,6 +52,8 @@ public class RunAllStopOnError implements IExecutionStrategy  {
 
         // Validate each populated command object in the command chain before execution.
 
+        Result<T> validationResult = null;
+
         for (var cmdLine : cmdChain) {
 
             var userObj = cmdLine.getCommandSpec().userObject();
@@ -58,90 +61,67 @@ public class RunAllStopOnError implements IExecutionStrategy  {
             // Bail if the command class does not implements Callable
 
             if (!(userObj instanceof Callable)) {
-                System.err.println("Command class for " +  cmdLine.getCommandSpec().name() +  "  does not implement Callable");
+                log.error("Command class for {} does not implement Callable", cmdLine.getCommandSpec().name());
                 return ExitCode.SOFTWARE;
             }
 
             // Bail if the user object can be validated and is not valid
+            // Perform bean validation if a Validator is available on the classpath
 
-            if (userObj != null) {
+            try {
+                // Call validator.validate(userObj)
 
-                // Perform bean validation if a Validator is available on the classpath
+                var violations = validator.validate(userObj);
 
-                try {
-                    // Call validator.validate(userObj)
+                if (!violations.isEmpty()) {
 
-                    var violations = validator.validate(userObj);
+                    var message = violations.stream()
+                        .map(v -> v.getPropertyPath() + " " + v.getMessage())
+                        .collect(Collectors.joining(", "));
 
-                    if (!violations.isEmpty()) {
-
-                        var message = violations.stream()
-                            .map(v -> v.getPropertyPath() + " " + v.getMessage())
-                            .collect(Collectors.joining(", "));
-
-                        System.err.println(message);
-                        return ExitCode.USAGE;
-                    }
-
-                } catch (CommandLine.ParameterException pe) {
-                    throw pe; // propagate validation errors
-                } catch (Exception e) {
-                    // If validation infrastructure fails, treat as non-fatal and continue
-                    // (could log here if desired, but per project rules, do not log here)
+                    log.error("Validation errors for {}: {}", cmdLine.getCommandSpec().name(), message);
+                    return ExitCode.SOFTWARE;
                 }
+
+            } catch (Exception e) {
+                log.error("Error validating command class for {}: {}", cmdLine.getCommandSpec().name(), e);
+                return ExitCode.SOFTWARE;
             }
         }
 
         // Execute the command chain and handle the results
 
-        var results = new ArrayList<Object>();
+        var results = new ArrayList<Result<T>>();
 
         for (var cmdObj : cmdChain) {
 
             var result = cmdObj.getCommandSpec().userObject();
 
-            // Bail if the command does not implements Callable
-
-            if (!(result instanceof Callable)) {
-                log.error("Command class for{} does not implement Callable", cmdObj.getCommandSpec().name());
-                return ExitCode.SOFTWARE;
-            }
-
             // Execute the command and check if it returns an Outcome object
 
             try {
 
-                var outcome = ((Callable<?>) result).call();
+                @SuppressWarnings("unchecked")
+                var outcome = ((Callable<Result<T>>) result).call();
 
                 // Bail if the command does not return an Outcome object
-                if (!(outcome instanceof Outcome)) {
-                    System.err.println("Command does not return an operating result of Outcome");
+                if (!(outcome instanceof Result<T>)) {
+                    log.error("Command does not return an operating result of Result<T> type");
                     return ExitCode.SOFTWARE;
-                }
+                }   
 
                 // Evaluate the outcome 
 
-                var operatingResult = ((Outcome<Integer>) outcome);
-
-                switch (operatingResult) {
-                    case Success success:
-                        results.add(success.get());
-                        break;
-                    case Failure failure:
-                        System.err.println(failure.getDetail());
-                        return ExitCode.SOFTWARE;
-                    default:
-                        throw new CommandLine.ExecutionException(cmdObj, "Error checking command return type", new Exception("Unknown outcome type"));
-                }
+                var operatingResult = ((Result<T>) outcome);
+                results.add(operatingResult);
 
             } catch (Exception e) {
-                throw new CommandLine.ExecutionException(cmdObj, "Error checking command return type", e);
+                log.error("Error checking command return type for {}: {}", cmdObj.getCommandSpec().name(), e.getMessage());
+                return ExitCode.SOFTWARE;
             }
-
         }
   
         return ExitCode.OK;
-
     }
 
 }
